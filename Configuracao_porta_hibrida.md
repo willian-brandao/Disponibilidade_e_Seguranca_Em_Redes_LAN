@@ -1,52 +1,54 @@
-Configuração de Porta Híbrida - Manual de Instruções
-bash
-# ETAPA 1: Configurar o tipo de link como híbrido
-# Entra no modo de configuração da interface GigabitEthernet1/0/1
-# system-view: acessa o modo de configuração global do switch
-system-view
 
-# Interface GigabitEthernet1/0/1: seleciona a porta física para configuração
-interface GigabitEthernet1/0/1
+# Configuração de Porta Híbrida - Manual de Comandos
+## Comandos de Configuração
+### Etapa 1: Configurar Tipo de Link como Híbrido
+```
+[Switch-GigabitEthernet1/0/1] port link-type hybrid
+```
+Explicação: Define o tipo de link da porta como híbrido, permitindo o tráfego de múltiplas VLANs com diferentes comportamentos de tagging.
 
-# port link-type hybrid: define o tipo de link como híbrido
-# (permite tráfego de múltiplas VLANs com ou sem tags)
-port link-type hybrid
-bash
-# ETAPA 2: Associar VLANs à porta híbrida
-# port hybrid vlan: adiciona a porta às VLANs especificadas
-# vlan-id-list: lista de IDs de VLAN separados por vírgula ou intervalo
-# tagged: mantém as tags VLAN nos quadros (para VLANs tagged)
-# untagged: remove as tags VLAN nos quadros (para VLANs untagged)
-port hybrid vlan 10,20,30 tagged
-port hybrid vlan 40,50 untagged
-bash
-# ETAPA 3: Definir a VLAN PVID (Port VLAN ID)
-# port hybrid pvid vlan: define a VLAN nativa/untagged padrão
-# vlan-id: ID da VLAN que será usada como padrão para quadros sem tag
-# Os quadros sem tag receberão automaticamente esta VLAN ID
-port hybrid pvid vlan 10
-bash
-# COMANDO DE VERIFICAÇÃO:
-# Sai do modo de interface e verifica a configuração
-quit
-display current-configuration interface GigabitEthernet1/0/1
+### Etapa 2: Associar VLANs à Porta Híbrida
+```
+[Switch-GigabitEthernet1/0/1] port hybrid vlan vlan-id-list {tagged | untagged}
+```
+Explicação:
 
-# OU verifica especificamente as configurações de VLAN da porta
-display port hybrid
-bash
-# OBSERVAÇÃO IMPORTANTE:
-# Para converter entre porta trunk e híbrida, primeiro deve-se:
-# 1. Configurar como porta de acesso (reset)
-port link-type access
-# 2. Depois configurar como híbrida
-port link-type hybrid
-Explicação dos Conceitos:
+vlan-id-list: Lista de IDs de VLAN a serem associadas à porta
 
-Porta Híbrida: Permite passar múltiplas VLANs, algumas tagged (com tag) e outras untagged (sem tag)
+tagged: Mantém as tags VLAN nos quadros (uso entre switches)
 
-VLAN Tagged: Mantém a tag VLAN - usado para comunicação entre switches
+untagged: Remove as tags VLAN dos quadros (uso para dispositivos finais)
 
-VLAN Untagged: Remove a tag VLAN - usado para dispositivos finais
+Exemplos:
+```
+[Switch-GigabitEthernet1/0/1] port hybrid vlan 10,20,30 tagged
+[Switch-GigabitEthernet1/0/1] port hybrid vlan 40,50 untagged
+```
+### Etapa 3: Definir VLAN PVID (VLAN Nativa)
+```
+[Switch-GigabitEthernet1/0/1] port hybrid pvid vlan vlan-id
+```
+Explicação:
+Define a VLAN padrão (PVID) para a porta híbrida
+Quadros que chegam sem tag recebem automaticamente esta VLAN ID
 
-PVID: VLAN ID padrão para quadros que chegam sem tag
+Exemplo:
+```
+[Switch-GigabitEthernet1/0/1] port hybrid pvid vlan 10
+```
+### Observação Importante
 
+Conversão entre Tipos de Porta
+## Para converter porta trunk para híbrida ou vice-versa:
+## Primeiro configure como porta de acesso
+```
+[Switch-GigabitEthernet1/0/1] port link-type access
+```
+## Depois configure como desejado
+```
+[Switch-GigabitEthernet1/0/1] port link-type hybrid
+```
+### Comportamento Padrão
+
+Por padrão, uma porta híbrida permite apenas a passagem de quadros da VLAN 1
+É necessário configurar explicitamente as VLANs desejadas
